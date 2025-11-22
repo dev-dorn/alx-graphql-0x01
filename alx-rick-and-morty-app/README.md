@@ -1,40 +1,218 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# Rick and Morty GraphQL Application
 
-## Getting Started
+This project is part of the **ALX GraphQL curriculum**, where you build a React/Next.js application that consumes the **Rick and Morty GraphQL API** using **Apollo Client**. This README explains the setup steps, project structure, and how to move the project directory using shell commands.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 📌 Project Overview
+
+This application connects to the Rick and Morty GraphQL API and fetches data such as episodes, characters, and locations. It is built using:
+
+* **Next.js (TypeScript)**
+* **Tailwind CSS**
+* **Apollo Client (GraphQL)**
+* **ESLint**
+
+The project name is: **alx-rick-and-morty-app**.
+
+---
+
+## 🛠️ Initial Project Setup
+
+### 1. Create the project directory
+
+Inside the `alx-graphql-0x01` directory:
+
+```sh
+yarn create next-app alx-rick-and-morty-app --typescript --eslint --tailwind
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+or
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+```sh
+npx create-next-app@latest alx-rick-and-morty-app --typescript --eslint --tailwind
+```
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+---
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+### 2. Install GraphQL dependencies
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```sh
+npm install @apollo/client graphql
+npm install @types/graphql
+```
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 📁 GraphQL Setup
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
+### Create the `graphql/` directory
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```sh
+mkdir graphql
+```
 
-## Deploy on Vercel
+### Create Apollo Client file
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+`graphql/apolloClient.ts`:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+```ts
+import { ApolloClient, InMemoryCache, HttpLink } from "@apollo/client";
+
+const client = new ApolloClient({
+  link: new HttpLink({
+    uri: "https://rickandmortyapi.com/graphql",
+  }),
+  cache: new InMemoryCache(),
+});
+
+export default client;
+```
+
+### Create GraphQL Queries file
+
+`graphql/queries.ts`:
+
+```ts
+import { gql } from "@apollo/client";
+
+export const GET_EPISODES = gql`
+  query getEpisodes($page: Int, $filter: FilterEpisode) {
+    episodes(page: $page, filter: $filter) {
+      info {
+        pages
+        next
+        prev
+        count
+      }
+      results {
+        id
+        name
+        air_date
+        episode
+      }
+    }
+  }
+`;
+```
+
+---
+
+## 🔌 Adding ApolloProvider to Next.js
+
+Open `pages/_app.tsx` and replace its content:
+
+```ts
+import "@/styles/globals.css";
+import type { AppProps } from "next/app";
+import { ApolloProvider } from "@apollo/client/react";
+import client from "@/graphql/apolloClient";
+
+export default function App({ Component, pageProps }: AppProps) {
+  return (
+    <ApolloProvider client={client}>
+      <Component {...pageProps} />
+    </ApolloProvider>
+  );
+}
+```
+
+> Note: Some Apollo Client versions require you to import ApolloProvider from `@apollo/client/react` instead of `@apollo/client`.
+
+---
+
+## 🚀 Running the Application
+
+### Development mode
+
+```sh
+npm run dev
+```
+
+Visit: `http://localhost:3000`
+
+### Production mode
+
+You **must build first**:
+
+```sh
+npm run build
+npm run start
+```
+
+If you see this error:
+
+```
+Could not find a production build in the '.next' directory
+```
+
+It means you forgot to run `npm run build`.
+
+---
+
+## 📦 Moving Project Directories in Shell
+
+If you need to move your project directory using the terminal:
+
+### ✅ Move the folder into another directory
+
+```sh
+mv alx-rick-and-morty-app alx/
+```
+
+This results in:
+
+```
+alx/alx-rick-and-morty-app
+```
+
+### ✅ Move and rename the folder
+
+```sh
+mv alx-rick-and-morty-app alx/rick-and-morty-app
+```
+
+### ❌ Incorrect command example
+
+```
+mv alx-rick-and-morty-app alx/rick-and-and-morty-app
+```
+
+This renames the folder incorrectly (`and-and`) instead of moving it properly.
+
+---
+
+## 🧹 Removing Git
+
+If you accidentally or intentionally remove your Git repository:
+
+```sh
+rm -rf .git
+```
+
+You can reinitialize Git:
+
+```sh
+git init
+git add .
+git commit -m "Initial commit"
+```
+
+---
+
+## ✔️ Required Files for Submission
+
+Inside `alx-graphql-0x01/alx-rick-and-morty-app`:
+
+* `README.md`
+* `graphql/apolloClient.ts`
+* `graphql/queries.ts`
+* `pages/_app.tsx`
+
+---
+
+## 🎉 Conclusion
+
+You now have a complete React + GraphQL application using Apollo Client and the Rick and Morty API. The setup is fully aligned with your ALX project requirements. Continue by building UI pages and rendering episode data.
+
+If you want help building the Episodes page or integrating pagination, feel free to ask!
